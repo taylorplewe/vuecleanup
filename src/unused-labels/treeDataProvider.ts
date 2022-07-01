@@ -1,12 +1,6 @@
 import * as vscode from "vscode";
 import { UnusedLabelsTreeItem } from "./treeItem";
-
-const UNUSED_LABELS_ID_NAME: any = {
-    dataMembers: "data members",
-    computeds: "computed properties",
-    methods: "methods",
-    cssClasses: "CSS classes"
-};
+import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
 
 const DUMMY_DATA: any = {
     dataMembers: {
@@ -26,6 +20,12 @@ const DUMMY_DATA: any = {
         "examine()": 1,
         "tryThis()": 1
     },
+    variables: {
+        "cheese": 5,
+        "myVar": 1,
+        "isGlobalElecEnabled": 1,
+        "urpflanze": 5
+    },
     cssClasses: {
         ".bold": 4,
         ".mystrong": 1,
@@ -39,10 +39,10 @@ const DUMMY_DATA: any = {
 export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeItem> {
     constructor() {
         this.unusedLabelsData = {};
-        Object.keys(UNUSED_LABELS_ID_NAME).forEach(labelId => {
+        Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
             this.unusedLabelsData[labelId] = {
                 treeItem: new UnusedLabelsTreeItem(
-                    UNUSED_LABELS_ID_NAME[labelId],
+                    UNUSED_LABELS_TYPES[labelId],
                     vscode.TreeItemCollapsibleState.Collapsed,
                     labelId
                 ),
@@ -51,6 +51,13 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
         });
     }
     public unusedLabelsData: any;
+
+    private _onDidChangeTreeData: vscode.EventEmitter<UnusedLabelsTreeItem | undefined | null | void> = new vscode.EventEmitter<UnusedLabelsTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<UnusedLabelsTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
+    }
 
     getTreeItem(element : UnusedLabelsTreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
@@ -69,8 +76,8 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
             return Promise.resolve([]);
     }
 
-    public updateGroupCounts() : void {
-        Object.keys(UNUSED_LABELS_ID_NAME).forEach(labelId => {
+    private updateGroupCounts() : void {
+        Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
             this.unusedLabelsData[labelId].treeItem.description = 
                 this.getChildrenArrays(this.unusedLabelsData[labelId].children).length.toString();
         });
@@ -84,24 +91,25 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 
     private getGroupTreeItems() : UnusedLabelsTreeItem[] {
         let treeItemArray: UnusedLabelsTreeItem[] = [];
-        Object.keys(UNUSED_LABELS_ID_NAME).forEach(labelId => {
+        Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
             treeItemArray.push(this.unusedLabelsData[labelId].treeItem);
         });
         return treeItemArray;
     }
 
-    public fillWithDummyData() : void {
-        Object.keys(DUMMY_DATA).forEach(groupId => {
-            Object.keys(DUMMY_DATA[groupId]).forEach(labelName => {
+    public updateData(data: any) : void {
+        Object.keys(data).forEach(groupId => {
+            Object.keys(data[groupId]).forEach(labelName => {
                 this.unusedLabelsData[groupId].children[labelName] = 
                     new UnusedLabelsTreeItem(
                         labelName,
                         vscode.TreeItemCollapsibleState.None,
-                        "label")
-                ;
-                for (let i: number = 0; i < DUMMY_DATA[groupId][labelName] - 1; i++)
+                        "label");
+                for (let i: number = 0; i < data[groupId][labelName] - 1; i++)
                     <UnusedLabelsTreeItem>this.unusedLabelsData[groupId].children[labelName].incrementOccurrence();
             });
         });
+        this.updateGroupCounts();
     }
 }
+

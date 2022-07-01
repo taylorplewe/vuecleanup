@@ -3,7 +3,7 @@
 import { join } from 'path';
 import * as vscode from 'vscode';
 import { FileLabelsData } from './unused-labels/treeDataProvider';
-import CheckForUnusedLabels from './unused-labels/unusedLabelsCheck';
+import checkForUnusedLabels from './unused-labels/unusedLabelsCheck';
 
 let fileLabelsData : FileLabelsData;
 
@@ -11,12 +11,11 @@ let fileLabelsData : FileLabelsData;
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	initFileLabelsData();
-	fileLabelsData.fillWithDummyData();
-	fileLabelsData.updateGroupCounts();
 
 	vscode.window.createTreeView("unused-labels", {
 		treeDataProvider: fileLabelsData
 	});
+	vscode.window.registerTreeDataProvider("unused-labels", fileLabelsData);
 	
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
@@ -31,8 +30,10 @@ export function activate(context: vscode.ExtensionContext) {
 		// Display a message box to the user
 		vscode.window.showInformationMessage('You done clicked it boi');
 		console.log(vscode.window.activeTextEditor);
-		if (vscode.window.activeTextEditor)
-			CheckForUnusedLabels(vscode.window.activeTextEditor.document);
+		if (vscode.window.activeTextEditor) {
+			fileLabelsData.updateData(checkForUnusedLabels(vscode.window.activeTextEditor.document));
+			fileLabelsData.refresh();
+		}
 	});
 
 	context.subscriptions.push(disposable);
