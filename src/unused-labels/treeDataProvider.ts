@@ -39,25 +39,14 @@ const DUMMY_DATA: any = {
 export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeItem> {
     constructor() {
         this.unusedLabelsData = {};
-        Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
-            this.unusedLabelsData[labelId] = {
-                treeItem: new UnusedLabelsTreeItem(
-                    UNUSED_LABELS_TYPES[labelId],
-                    vscode.TreeItemCollapsibleState.Collapsed,
-                    labelId
-                ),
-                children: {}
-            };
-        });
+        this.topLevelTreeItems = [];
+        this.initData();
     }
     public unusedLabelsData: any;
+    private topLevelTreeItems: UnusedLabelsTreeItem[];
 
     private _onDidChangeTreeData: vscode.EventEmitter<UnusedLabelsTreeItem | undefined | null | void> = new vscode.EventEmitter<UnusedLabelsTreeItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<UnusedLabelsTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
-
-    refresh(): void {
-        this._onDidChangeTreeData.fire();
-    }
 
     getTreeItem(element : UnusedLabelsTreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
@@ -67,7 +56,7 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
         element?: UnusedLabelsTreeItem | undefined
     ): vscode.ProviderResult<UnusedLabelsTreeItem[]> {
         if (!element) {
-            return Promise.resolve(this.getGroupTreeItems());
+            return Promise.resolve(this.topLevelTreeItems);
         }
         else if (element.type !== "label" && Object.keys(this.unusedLabelsData[element.type].children).length) {
             return Promise.resolve(this.getChildrenArrays(this.unusedLabelsData[element.type].children));
@@ -76,28 +65,23 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
             return Promise.resolve([]);
     }
 
-    private updateGroupCounts() : void {
+    private initData() : void {
+        this.topLevelTreeItems = [];
         Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
-            this.unusedLabelsData[labelId].treeItem.description = 
-                this.getChildrenArrays(this.unusedLabelsData[labelId].children).length.toString();
+            this.unusedLabelsData[labelId] = {
+                treeItem: new UnusedLabelsTreeItem(
+                    UNUSED_LABELS_TYPES[labelId],
+                    vscode.TreeItemCollapsibleState.Collapsed,
+                    labelId
+                ),
+                children: {}
+            };
+            this.topLevelTreeItems.push(this.unusedLabelsData[labelId].treeItem); 
         });
     }
 
-    private getChildrenArrays(childrenObj: any) : UnusedLabelsTreeItem[] {
-        let stupidFaggotArray: UnusedLabelsTreeItem[] =
-            Object.values(childrenObj);
-        return stupidFaggotArray.filter(l => l.getOccurrences() === 1);
-    }
-
-    private getGroupTreeItems() : UnusedLabelsTreeItem[] {
-        let treeItemArray: UnusedLabelsTreeItem[] = [];
-        Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
-            treeItemArray.push(this.unusedLabelsData[labelId].treeItem);
-        });
-        return treeItemArray;
-    }
-
-    public updateData(data: any) : void {
+    updateData(data: any) : void {
+        this.resetChildrenOfTopLevel();
         Object.keys(data).forEach(groupId => {
             Object.keys(data[groupId]).forEach(labelName => {
                 this.unusedLabelsData[groupId].children[labelName] = 
@@ -110,6 +94,29 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
             });
         });
         this.updateGroupCounts();
+    }
+
+    private resetChildrenOfTopLevel() : void {
+        Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
+            this.unusedLabelsData[labelId].children = {};
+        });
+    }
+
+    private updateGroupCounts() : void {
+        Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
+            this.unusedLabelsData[labelId].treeItem.description = 
+                this.getChildrenArrays(this.unusedLabelsData[labelId].children).length.toString();
+        });
+    }
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
+    }
+
+    private getChildrenArrays(childrenObj: any) : UnusedLabelsTreeItem[] {
+        let stupidFaggotArray: UnusedLabelsTreeItem[] =
+            Object.values(childrenObj);
+        return stupidFaggotArray.filter(l => l.getOccurrences() === 1);
     }
 }
 

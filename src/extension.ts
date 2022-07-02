@@ -3,45 +3,43 @@
 import { join } from 'path';
 import * as vscode from 'vscode';
 import { FileLabelsData } from './unused-labels/treeDataProvider';
+import { UnusedLabelsTreeItem } from './unused-labels/treeItem';
 import checkForUnusedLabels from './unused-labels/unusedLabelsCheck';
 
 let fileLabelsData : FileLabelsData;
+let unusedLabelsTreeView : vscode.TreeView<UnusedLabelsTreeItem>;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	initFileLabelsData();
-
-	vscode.window.createTreeView("unused-labels", {
-		treeDataProvider: fileLabelsData
-	});
-	vscode.window.registerTreeDataProvider("unused-labels", fileLabelsData);
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
 	console.log('Vue Cleanup extension active');
 
+	initFileLabelsData();
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('vuecleanup.unusedlabels', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('You done clicked it boi');
-		console.log(vscode.window.activeTextEditor);
-		if (vscode.window.activeTextEditor) {
-			fileLabelsData.updateData(checkForUnusedLabels(vscode.window.activeTextEditor.document));
-			fileLabelsData.refresh();
-		}
+	unusedLabelsTreeView = vscode.window.createTreeView("unused-labels", {
+		treeDataProvider: fileLabelsData
 	});
 
-	context.subscriptions.push(disposable);
+	vscode.window.registerTreeDataProvider("unused-labels", fileLabelsData);
+	
+	updateUnusedLabelsData();
+	registerEvents();
 }
 
 function initFileLabelsData() {
 	fileLabelsData = new FileLabelsData();
 }
 
-// this method is called when your extension is deactivated
+function registerEvents() {
+	vscode.workspace.onDidSaveTextDocument(updateUnusedLabelsData);
+	vscode.window.onDidChangeActiveTextEditor(updateUnusedLabelsData);
+}
+
+function updateUnusedLabelsData() {
+	if (vscode.window.activeTextEditor) {
+		fileLabelsData.updateData(checkForUnusedLabels(vscode.window.activeTextEditor.document));
+		fileLabelsData.refresh();
+	}
+}
+
 export function deactivate() {}
