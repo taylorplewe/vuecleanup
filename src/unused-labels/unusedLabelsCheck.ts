@@ -6,17 +6,17 @@ export default function checkForUnusedLabels(doc: vscode.TextDocument): any {
     const fileText: string = doc.getText();
     const varsInFile: Set<string> = getVarsInFile(fileText);
     const cssClassesInFile: Set<string> = getCssClassesInFile(fileText);
+    console.log(cssClassesInFile);
 
     let labelsWithOccurrences: any = buildLabelsWithOccurrences();
 
     const scriptSectionNoCommentsOrStrings = getScriptSectionNoCommentsOrStrings(fileText);
-    console.log(scriptSectionNoCommentsOrStrings);
     varsInFile.forEach(v => {
         labelsWithOccurrences.variables[v] =
             getOccurrencesOfVariable(scriptSectionNoCommentsOrStrings, v);
     });
     cssClassesInFile.forEach(c => {
-        labelsWithOccurrences.cssClasses[c] = getOccurrencesOfCssClasses(fileText, c);
+        labelsWithOccurrences.cssClasses[c] = getOccurrencesOfCssClasses(fileText, c.substring(1)) + 1;
     });
 
     return labelsWithOccurrences;
@@ -53,11 +53,23 @@ function getCssClassesInFile(fileText: string): Set<string> {
 }
 
 function getOccurrencesOfCssClasses(fileText: string, className: string): number {
-    return 1;
+    const fileTemplateSection: string = getFileSectionByType(fileText, 'template');
+    const searchClassInardsRegex: RegExp = /(?<=\bclass=").*?(?=")/gs;
+    const searchClassNameRegex: RegExp = new RegExp(`\\b${className}\\b`, 'gs');
+    
+    let occurrences: number = 0;
+    const classInardsMatch: string[] | null = fileTemplateSection.match(searchClassInardsRegex);
+    if (classInardsMatch) {
+        classInardsMatch.forEach(m => {
+            const classNameMatch = m.match(searchClassNameRegex);
+            if (classNameMatch) occurrences += classNameMatch.length;
+        })
+    }
+    return occurrences;
 }
 
 function getScriptSectionNoCommentsOrStrings(fileText: string): string {
-    let fileScriptSection = getFileSectionByType(fileText, 'script');
+    let fileScriptSection: string = getFileSectionByType(fileText, 'script');
     fileScriptSection = removeCommentsFromText(fileScriptSection);
     fileScriptSection = removeStringsFromText(fileScriptSection);
     return fileScriptSection;
@@ -75,7 +87,6 @@ function removeStringsFromText(text: string): string {
         extractFormattedStringEscapesInText(noStringsText)
     );
     noStringsText = noStringsText.replace(searchStringRegex, '');
-    console.log(noStringsText);
     return noStringsText;
 }
 
