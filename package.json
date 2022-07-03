@@ -1,7 +1,8 @@
 {
-  "name": "vuecleanup",
-	"displayName": "VueCleanup",
-	"description": "",
+	"name": "vuecleanup",
+	"displayName": "Vue Cleanup",
+	"description": "Keeps track of unused methods, data members, variables, CSS classes and computed properties while you work.",
+	"publisher": "Taylor Plewe",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.67.0"
@@ -10,7 +11,7 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onStartupFinished",
+		"onView:unused-labels",
 		"onCommand:vuecleanup.unusedlabels"
 	],
 	"main": "./out/extension.js",
@@ -59,5 +60,9 @@
 		"mocha": "^10.0.0",
 		"typescript": "^4.7.2",
 		"@vscode/test-electron": "^2.1.3"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/taylorplewe/vuecleanup.git"
 	}
 }
