@@ -13,7 +13,6 @@ export default function checkForUnusedLabels(doc: vscode.TextDocument): any {
 	let labelsWithOccurrences: any = buildLabelsWithOccurrences();
 
 	const scriptSectionNoCommentsOrStrings = getFileSectionByType(fileText, 'script', true);
-	console.log(scriptSectionNoCommentsOrStrings);
 	varsInFile.forEach(v => {
 		// NOTE I should be able to search for variables in their own scope instead of doing this
 		labelsWithOccurrences.variables[v] =

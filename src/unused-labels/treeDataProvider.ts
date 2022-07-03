@@ -65,8 +65,9 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 		else if (element.type !== "label" && Object.keys(this.unusedLabelsData[element.type].children).length) {
 			return this.getFilteredChildrenArrayFromObj(this.unusedLabelsData[element.type].children);
 		}
-		else
+		else {
 			return [];
+		}
 	}
 	
 	getParent(element: UnusedLabelsTreeItem): UnusedLabelsTreeItem | null {
