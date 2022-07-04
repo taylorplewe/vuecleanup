@@ -5,17 +5,20 @@ export class UnusedLabelsTreeItem extends vscode.TreeItem {
 		public readonly label: string,
 		public collapsibleState: vscode.TreeItemCollapsibleState,
 		public type: string,
-		public parentId: string
+		public parentId: string,
+		public description?: string
 	) {
 		super(label, collapsibleState);
 		this.type = type;
 		this.parentId = parentId;
 		this.occurrences = 1;
-		this.command = {
-			command: "unusedLabels.goToLabel",
-			title: "Go to label",
-			arguments: [this.label]
-		}
+		if (this.parentId)
+			this.command = {
+				command: "unusedLabels.goToLabel",
+				title: "Go to label",
+				arguments: [this.label]
+			}
+		if (description) this.description = description;
 	}
 	private occurrences: number;
 

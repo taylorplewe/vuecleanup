@@ -2,8 +2,6 @@ import * as vscode from "vscode";
 import { UnusedLabelsTreeItem } from "./treeItem";
 import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
 
-const TIME_BEFORE_REVEAL: number = 100;
-
 export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeItem> {
 	constructor() {
 		this.unusedLabelsData = {};
@@ -45,10 +43,11 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 		Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
 			this.unusedLabelsData[labelId] = {
 				treeItem: new UnusedLabelsTreeItem(
-					UNUSED_LABELS_TYPES[labelId],
+					'',
 					vscode.TreeItemCollapsibleState.Expanded,
 					labelId,
-					''
+					'',
+					UNUSED_LABELS_TYPES[labelId]
 				),
 				children: {}
 			};
@@ -91,23 +90,15 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 		if (this.getFilteredChildrenArrayFromObj(this.unusedLabelsData[type].children).length) {
 			this.unusedLabelsData[type].treeItem.collapsibleState =
 				vscode.TreeItemCollapsibleState.Expanded;
-			this.revealAndExpandTreeItem(this.unusedLabelsData[type].treeItem);
 		} else {
 			this.unusedLabelsData[type].treeItem.collapsibleState =
 				 vscode.TreeItemCollapsibleState.None;
 		}
 	}
 
-	private revealAndExpandTreeItem(item: UnusedLabelsTreeItem): void {
-		setTimeout(() => { this.parentTreeView?.reveal(item, {
-			expand: true,
-			select: false
-		})}, TIME_BEFORE_REVEAL);
-	}
-
 	private updateGroupCounts(): void {
 		Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
-			this.unusedLabelsData[labelId].treeItem.description = 
+			this.unusedLabelsData[labelId].treeItem.label = 
 				this.getFilteredChildrenArrayFromObj(this.unusedLabelsData[labelId].children).length.toString();
 		});
 	}

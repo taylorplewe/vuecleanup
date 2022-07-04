@@ -12,9 +12,9 @@ export function activate(context: vscode.ExtensionContext) {
 	initFileLabelsData();
 
 	unusedLabelsTreeView = vscode.window.createTreeView("unused-labels", {
-		treeDataProvider: fileLabelsData
+		"treeDataProvider": fileLabelsData,
+		"showCollapseAll": true
 	});
-	context.subscriptions.push(unusedLabelsTreeView);
 	fileLabelsData.parentTreeView = unusedLabelsTreeView;
 
 	vscode.window.registerTreeDataProvider("unused-labels", fileLabelsData);
