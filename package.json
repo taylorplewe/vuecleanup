@@ -38,7 +38,13 @@
 					"name": "Unused labels"
 				}
 			]
-		}
+		},
+		"commands": [
+			{
+				"command": "unusedLabels.openFile",
+				"title": "Go to label"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

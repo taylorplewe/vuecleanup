@@ -11,6 +11,11 @@ export class UnusedLabelsTreeItem extends vscode.TreeItem {
 		this.type = type;
 		this.parentId = parentId;
 		this.occurrences = 1;
+		this.command = {
+			command: "unusedLabels.goToLabel",
+			title: "Go to label",
+			arguments: [this.label]
+		}
 	}
 	private occurrences: number;
 

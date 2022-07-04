@@ -14,9 +14,11 @@ export function activate(context: vscode.ExtensionContext) {
 	unusedLabelsTreeView = vscode.window.createTreeView("unused-labels", {
 		treeDataProvider: fileLabelsData
 	});
+	context.subscriptions.push(unusedLabelsTreeView);
 	fileLabelsData.parentTreeView = unusedLabelsTreeView;
 
 	vscode.window.registerTreeDataProvider("unused-labels", fileLabelsData);
+	vscode.commands.registerCommand("unusedLabels.goToLabel", label => goToLabel(label));
 
 	handleOnFileChange();
 	registerEvents();
@@ -51,6 +53,33 @@ function updateUnusedLabelsData() {
 
 function checkIfFileIsVue(): Boolean {
 	return vscode.window.activeTextEditor?.document.languageId === 'vue';
+}
+
+function goToLabel(label: string): void {
+	let textEditor: vscode.TextEditor | undefined;
+	if (textEditor = vscode.window.activeTextEditor) {
+		const numFileLines: number = textEditor.document.lineCount;
+		let line: number;
+		let labelIndexInLine: number = 0;
+		let found: boolean = false;
+		for (line = 0; line < numFileLines; line++) {
+			labelIndexInLine = textEditor.document.lineAt(line).text.indexOf(label);
+			if (labelIndexInLine !== -1) {
+				found = true;
+				break;
+			}
+		}
+		if (found) {
+			const labelPosition: vscode.Position = new vscode.Position(line, labelIndexInLine);
+			const labelEndPosition: vscode.Position = new vscode.Position(line, labelIndexInLine + label.length);
+			textEditor.selection = new vscode.Selection(labelPosition, labelEndPosition);
+			
+			textEditor.revealRange(
+				new vscode.Range(labelPosition, labelEndPosition),
+				vscode.TextEditorRevealType.InCenter
+			);
+		}
+	}
 }
 
 export function deactivate() {}
