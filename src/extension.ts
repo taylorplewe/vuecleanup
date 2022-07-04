@@ -28,7 +28,7 @@ function initFileLabelsData() {
 
 function registerEvents() {
 	// vscode.workspace.onDidSaveTextDocument(updateUnusedLabelsData);
-	vscode.workspace.onDidChangeTextDocument(updateUnusedLabelsData);
+	vscode.workspace.onDidChangeTextDocument(handleOnFileChange);
 	vscode.window.onDidChangeActiveTextEditor(handleOnFileChange);
 }
 

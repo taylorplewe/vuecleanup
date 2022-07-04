@@ -107,7 +107,6 @@ function getKeysOfNestedObject(fileText: string, objectName: string): Set<string
 	const keys: string[] = keysMatch.map(m => m[1]);
 	return new Set(keys);
 }
-
 // {objectName}: { ... } -> returns ...
 function getNestedObjectInards(fileText: string, objectName: string): string {
 	const getFirstWhitespaceRegex: RegExp = new RegExp(
