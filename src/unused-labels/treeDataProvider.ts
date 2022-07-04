@@ -2,40 +2,6 @@ import * as vscode from "vscode";
 import { UnusedLabelsTreeItem } from "./treeItem";
 import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
 
-const DUMMY_DATA: any = {
-	dataMembers: {
-		"isModalOpen": 6,
-		"isKyleDead": 1,
-		"taxable": 1,
-		"currentCostCenter": 2,
-		"maryIsAlive": 4
-	},
-	computeds: {
-		"filteredMetadata": 1,
-		"filteredObjects": 4,
-		"filteredHealthyes": 5
-	},
-	methods: {
-		"prove()": 2,
-		"examine()": 1,
-		"tryThis()": 1
-	},
-	variables: {
-		"cheese": 5,
-		"myVar": 1,
-		"isGlobalElecEnabled": 1,
-		"urpflanze": 5
-	},
-	cssClasses: {
-		".bold": 4,
-		".mystrong": 1,
-		".labels": 4,
-		".inputs": 2,
-		".not-input": 1,
-		".not-letter": 1
-	}
-};
-
 const TIME_BEFORE_REVEAL: number = 100;
 
 export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeItem> {
