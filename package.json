@@ -4,7 +4,7 @@
 	"description": "Never get a PR sent back to you again",
 	"publisher": "Taylor Plewe",
 	"icon": "resources/vue-cleanup-logo-256.png",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"engines": {
 		"vscode": "^1.67.0"
 	},
