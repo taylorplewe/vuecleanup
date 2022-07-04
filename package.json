@@ -1,9 +1,10 @@
 {
 	"name": "vuecleanup",
 	"displayName": "Vue Cleanup",
-	"description": "Keeps track of unused methods, data members, variables, CSS classes and computed properties while you work.",
+	"description": "Never get a PR sent back to you again",
 	"publisher": "Taylor Plewe",
-	"version": "0.0.1",
+	"icon": "resources/vue-cleanup-logo-256.png",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.67.0"
 	},
@@ -11,17 +12,10 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:unused-labels",
-		"onCommand:vuecleanup.unusedlabels"
+		"onView:unused-labels"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "vuecleanup.unusedlabels",
-				"title": "Check for unused labels"
-			}
-		],
 		"viewsContainers": {
 			"activitybar": [
 				{
@@ -31,6 +25,12 @@
 				}
 			]
 		},
+		"viewsWelcome": [
+			{
+				"view": "unused-labels",
+				"contents": "Open a Vue (.vue) file to use this extension."
+			}
+		],
 		"views": {
 			"vue-cleanup": [
 				{

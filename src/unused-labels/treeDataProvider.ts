@@ -1,4 +1,3 @@
-import { join } from "path";
 import * as vscode from "vscode";
 import { UnusedLabelsTreeItem } from "./treeItem";
 import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
@@ -56,9 +55,7 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 		return element;
 	}
 
-	getChildren(
-		element?: UnusedLabelsTreeItem | undefined
-	): UnusedLabelsTreeItem[] {
+	getChildren(element?: UnusedLabelsTreeItem | undefined): UnusedLabelsTreeItem[] {
 		if (!element) {
 			return this.topLevelTreeItems;
 		}
@@ -79,12 +76,11 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 	}
 
 	private initData(): void {
-		this.topLevelTreeItems = [];
 		Object.keys(UNUSED_LABELS_TYPES).forEach(labelId => {
 			this.unusedLabelsData[labelId] = {
 				treeItem: new UnusedLabelsTreeItem(
 					UNUSED_LABELS_TYPES[labelId],
-					vscode.TreeItemCollapsibleState.Collapsed,
+					vscode.TreeItemCollapsibleState.Expanded,
 					labelId,
 					''
 				),
@@ -95,6 +91,8 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 	}
 
 	updateData(data: any): void {
+		if (!this.topLevelTreeItems.length)
+			this.initData();
 		this.resetChildrenOfTopLevel();
 		Object.keys(data).forEach(groupId => {
 			Object.keys(data[groupId]).forEach(labelName => {
@@ -110,6 +108,11 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 			this.updateTopLevelExpandableState(groupId);
 		});
 		this.updateGroupCounts();
+	}
+
+	clearData(): void {
+		this.unusedLabelsData = {};
+		this.topLevelTreeItems = [];
 	}
 
 	private resetChildrenOfTopLevel(): void {

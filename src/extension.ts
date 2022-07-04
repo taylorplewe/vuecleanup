@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.window.registerTreeDataProvider("unused-labels", fileLabelsData);
 
-	updateUnusedLabelsData();
+	handleOnFileChange();
 	registerEvents();
 }
 
@@ -29,7 +29,7 @@ function initFileLabelsData() {
 function registerEvents() {
 	// vscode.workspace.onDidSaveTextDocument(updateUnusedLabelsData);
 	vscode.workspace.onDidChangeTextDocument(updateUnusedLabelsData);
-	vscode.window.onDidChangeActiveTextEditor(updateUnusedLabelsData);
+	vscode.window.onDidChangeActiveTextEditor(handleOnFileChange);
 }
 
 function updateUnusedLabelsData() {
@@ -39,6 +39,20 @@ function updateUnusedLabelsData() {
 		fileLabelsData.updateData(checkForUnusedLabels(vscode.window.activeTextEditor.document));
 		fileLabelsData.refresh();
 	}
+}
+
+function handleOnFileChange(): void {
+	if (checkIfFileIsVue()) {
+		updateUnusedLabelsData();
+	}
+	else {
+		fileLabelsData.clearData();
+		fileLabelsData.refresh();
+	}
+}
+
+function checkIfFileIsVue(): Boolean {
+	return vscode.window.activeTextEditor?.document.languageId === 'vue';
 }
 
 export function deactivate() {}
