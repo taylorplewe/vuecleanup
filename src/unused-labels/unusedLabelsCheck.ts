@@ -1,8 +1,14 @@
 import * as vscode from 'vscode';
 import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
 
+let templateSection: string;
+let styleSection: string;
+
 export default function checkForUnusedLabels(doc: vscode.TextDocument): any {
 	const fileText: string = removeCommentsFromText(doc.getText());
+	templateSection = getFileSectionByType(fileText, 'template', false);
+	styleSection = getFileSectionByType(fileText, 'style', false);
+
 	const varsInFile: Set<string> = getVarsInFile(fileText);
 	const cssClassesInFile: Set<string> = getCssClassesInFile(fileText);
 	const dataMembersInFile: Set<string> = getDataMembersInFile(fileText);
@@ -49,18 +55,21 @@ function getVarsInFile(fileText: string): Set<string> {
 }
 
 function getCssClassesInFile(fileText: string): Set<string> {
-	const fileStyleSection = getFileSectionByType(fileText, 'style', false);
-	const firstWhiteSpaceMatch = fileStyleSection.match(/^[^\n]*?(?=\.)/m);
+	const firstWhiteSpaceMatch = styleSection.match(/^[^\n]*?(?=\.)/m);
 	const firstWhitespace = firstWhiteSpaceMatch ? firstWhiteSpaceMatch[0] : '';
 	const searchCssClassesRegex: RegExp = /\B\.[\w\-_]+/g;
-	let cssClasses = fileStyleSection.match(searchCssClassesRegex);
+	let cssClasses = styleSection.match(searchCssClassesRegex);
 
 	const getTopLevelSectionsRegex: RegExp = new RegExp(
 		`(\\.[\\w_\\-]+)(\\s*?\\{\\s*?\\n)(.*?)(?=^${firstWhitespace}\\})`, 'gsm'
 	);
-	const topLevelSectionsMatch: RegExpMatchArray[] = [...fileStyleSection.matchAll(getTopLevelSectionsRegex)];
+	const topLevelSectionsMatch: RegExpMatchArray[] = [...styleSection.matchAll(getTopLevelSectionsRegex)];
 	topLevelSectionsMatch.forEach(s => {
-		cssClasses?.push(...getSubScssClassesInText(s[3], s[1]));
+		const subClasses = getSubScssClassesInText(s[3], s[1]);
+		if (subClasses.length) {
+			cssClasses?.push(...subClasses);
+			cssClasses?.splice(cssClasses?.indexOf(s[1]), 1); // ignore parent class
+		}
 	});
 
 	return new Set(cssClasses);
@@ -78,20 +87,22 @@ function getSubScssClassesInText(text: string, parentClass: string): string[] {
 	);
 	const subClassSectionsMatch: RegExpMatchArray[] | null = [...text.matchAll(subClassSectionsRegex)];
 	subClassSectionsMatch.forEach(s => {
-		const subClass = s[1].replace('&', parentClass);
-		subClasses.push(subClass);
-		subClasses.push(...getSubScssClassesInText(s[3], subClass));
+		const subClass: string = s[1].replace('&', parentClass);
+		const subSubClasses: string[] = getSubScssClassesInText(s[3], subClass);
+		if (subSubClasses.length)
+			subClasses.push(...subSubClasses);
+		else
+			subClasses.push(subClass);
 	})
 
 	return subClasses;
 }
 function getOccurrencesOfCssClasses(fileText: string, className: string): number {
-	const fileTemplateSection: string = getFileSectionByType(fileText, 'template', false);
 	const searchClassInardsRegex: RegExp = /(?<=\bclass=").*?(?=")/gs;
 	const searchClassNameRegex: RegExp = new RegExp(`\\b${className}\\b`, 'gs');
 	
 	let occurrences: number = 0;
-	const classInardsMatch: string[] | null = fileTemplateSection.match(searchClassInardsRegex);
+	const classInardsMatch: string[] | null = templateSection.match(searchClassInardsRegex);
 	if (classInardsMatch) {
 		classInardsMatch.forEach(m => {
 			const classNameMatch = m.match(searchClassNameRegex);
@@ -185,8 +196,13 @@ function formatEscapesForStringAppend(escapes: string[]): string {
 }
 
 function getFileSectionByType(fileText: string, type: string, removeStrings: boolean): string {
+	const firstWhitespaceRegex: RegExp = new RegExp(
+		`^[^\\n\\w]*?(?=<\\s*?${type})`, 'm'
+	);
+	const firstWhitespaceMatch = fileText.match(firstWhitespaceRegex);
+	const firstWhitespace = firstWhitespaceMatch ? firstWhitespaceMatch[0] : '';
 	const getSectionRegex: RegExp = new RegExp(
-		`(?:<\\s*?${type}[\\s\\S]*?>)([\\s\\S]*?)(?=<\\/\\s*${type})`
+		`(?:<\\s*?${type}.*?>)(.*)(?=^${firstWhitespace}<\\/\\s*${type})`, 'sm'
 	);
 	const sectionMatch = fileText.match(getSectionRegex);
 	if (removeStrings && sectionMatch)
