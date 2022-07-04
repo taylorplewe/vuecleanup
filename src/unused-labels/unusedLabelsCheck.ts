@@ -1,4 +1,3 @@
-import { join } from 'path';
 import * as vscode from 'vscode';
 import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
 
@@ -51,9 +50,40 @@ function getVarsInFile(fileText: string): Set<string> {
 
 function getCssClassesInFile(fileText: string): Set<string> {
 	const fileStyleSection = getFileSectionByType(fileText, 'style', false);
+	const firstWhiteSpaceMatch = fileStyleSection.match(/^[^\n]*?(?=\.)/m);
+	const firstWhitespace = firstWhiteSpaceMatch ? firstWhiteSpaceMatch[0] : '';
 	const searchCssClassesRegex: RegExp = /\B\.[\w\-_]+/g;
-	const cssClasses = fileStyleSection.match(searchCssClassesRegex);
+	let cssClasses = fileStyleSection.match(searchCssClassesRegex);
+
+	const getTopLevelSectionsRegex: RegExp = new RegExp(
+		`(\\.[\\w_\\-]+)(\\s*?\\{\\s*?\\n)(.*?)(?=^${firstWhitespace}\\})`, 'gsm'
+	);
+	const topLevelSectionsMatch: RegExpMatchArray[] = [...fileStyleSection.matchAll(getTopLevelSectionsRegex)];
+	topLevelSectionsMatch.forEach(s => {
+		cssClasses?.push(...getSubScssClassesInText(s[3], s[1]));
+	});
+
 	return new Set(cssClasses);
+}
+// recursive
+function getSubScssClassesInText(text: string, parentClass: string): string[] {
+	let subClasses: string[] = [];
+
+	const firstWhitespaceRegex: RegExp = /^\s*?(?=&)/m;
+	const firstWhitespaceMatch: RegExpMatchArray | null = text.match(firstWhitespaceRegex);
+	const firstWhitespace: string = firstWhitespaceMatch ? firstWhitespaceMatch[0] : '';
+
+	const subClassSectionsRegex: RegExp = new RegExp(
+		`(&[\\w_\\-]+)(\\s*?\\{\\s*?\\n)(.*?)(?=^${firstWhitespace}\\})`, 'gsm'
+	);
+	const subClassSectionsMatch: RegExpMatchArray[] | null = [...text.matchAll(subClassSectionsRegex)];
+	subClassSectionsMatch.forEach(s => {
+		const subClass = s[1].replace('&', parentClass);
+		subClasses.push(subClass);
+		subClasses.push(...getSubScssClassesInText(s[3], subClass));
+	})
+
+	return subClasses;
 }
 function getOccurrencesOfCssClasses(fileText: string, className: string): number {
 	const fileTemplateSection: string = getFileSectionByType(fileText, 'template', false);
