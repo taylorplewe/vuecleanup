@@ -62,6 +62,7 @@ function handleOnFileChange(): void {
 	if (currentFile && checkIfFileIsVue()) {
 		updateUnusedLabelsData();
 		updateTodosData();
+		updateCommentsData();
 	}
 	else {
 		unusedLabelsDataProvider.clearData();
@@ -69,17 +70,24 @@ function handleOnFileChange(): void {
 	}
 }
 
-function updateUnusedLabelsData() {
+function updateUnusedLabelsData(): void {
 	if (currentFile) {
 		unusedLabelsDataProvider.updateData(getUnusedLabelData(currentFile));
 		unusedLabelsDataProvider.refresh();
 	}
 }
 
-function updateTodosData() {
+function updateTodosData(): void {
 	if (currentFile) {
 		todosDataProvider.updateData(getTodosData(currentFile.getText()));
 		todosDataProvider.refresh();
+	}
+}
+
+function updateCommentsData(): void {
+	if (currentFile) {
+		commentsDataProvider.updateData(getCommentsData(currentFile.getText()));
+		commentsDataProvider.refresh();
 	}
 }
 
