@@ -14,7 +14,7 @@ export class UnusedLabelsTreeItem extends vscode.TreeItem {
 		this.occurrences = 1;
 		if (this.parentId)
 			this.command = {
-				command: "unusedLabels.goToLabel",
+				command: "vuecleanup.goToLabel",
 				title: "Go to label",
 				arguments: [this.label]
 			}

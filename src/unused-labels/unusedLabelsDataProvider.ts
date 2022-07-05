@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { UnusedLabelsTreeItem } from "./treeItem";
+import { UnusedLabelsTreeItem } from "./unusedLabelsTreeItem";
 import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
 
-export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeItem> {
+export class UnusedLabelsDataProvider implements vscode.TreeDataProvider<UnusedLabelsTreeItem> {
 	constructor() {
 		this.unusedLabelsData = {};
 		this.topLevelTreeItems = [];
@@ -10,7 +10,6 @@ export class FileLabelsData implements vscode.TreeDataProvider<UnusedLabelsTreeI
 	}
 	public unusedLabelsData: any;
 	private topLevelTreeItems: UnusedLabelsTreeItem[];
-	public parentTreeView: vscode.TreeView<UnusedLabelsTreeItem> | undefined;
 
 	private _onDidChangeTreeData: vscode.EventEmitter<UnusedLabelsTreeItem | undefined | null | void> = new vscode.EventEmitter<UnusedLabelsTreeItem | undefined | null | void>();
 	readonly onDidChangeTreeData: vscode.Event<UnusedLabelsTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;

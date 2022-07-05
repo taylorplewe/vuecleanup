@@ -12,7 +12,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:unused-labels"
+		"onView:vuecleanup.unused-labels"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -27,24 +27,28 @@
 		},
 		"viewsWelcome": [
 			{
-				"view": "unused-labels",
+				"view": "vuecleanup.unused-labels",
 				"contents": "Open a Vue (.vue) file to use this extension."
 			}
 		],
 		"views": {
 			"vue-cleanup": [
 				{
-					"id": "unused-labels",
+					"id": "vuecleanup.unused-labels",
 					"name": "Unused labels"
+				},
+				{
+					"id": "vuecleanup.comments",
+					"name": "Comments",
+					"visibility": "collapsed"
+				},
+				{
+					"id": "vuecleanup.todos",
+					"name": "Todos",
+					"visibility": "collapsed"
 				}
 			]
-		},
-		"commands": [
-			{
-				"command": "unusedLabels.openFile",
-				"title": "Go to label"
-			}
-		]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

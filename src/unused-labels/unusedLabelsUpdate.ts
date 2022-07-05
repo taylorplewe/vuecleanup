@@ -4,7 +4,7 @@ import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
 let templateSection: string;
 let styleSection: string;
 
-export default function checkForUnusedLabels(doc: vscode.TextDocument): any {
+export default function getUnusedLabelData(doc: vscode.TextDocument): any {
 	const fileText: string = removeCommentsFromText(doc.getText());
 	templateSection = getFileSectionByType(fileText, 'template', false);
 	styleSection = getFileSectionByType(fileText, 'style', false);

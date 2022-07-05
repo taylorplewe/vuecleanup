@@ -1,31 +1,38 @@
 import * as vscode from 'vscode';
-import { FileLabelsData } from './unused-labels/treeDataProvider';
-import { UnusedLabelsTreeItem } from './unused-labels/treeItem';
-import checkForUnusedLabels from './unused-labels/unusedLabelsCheck';
 
-let fileLabelsData: FileLabelsData;
+import { UnusedLabelsDataProvider } from './unused-labels/unusedLabelsDataProvider';
+import { UnusedLabelsTreeItem } from './unused-labels/unusedLabelsTreeItem';
+import getUnusedLabelData from './unused-labels/unusedLabelsUpdate';
+
+import { CommentsDataProvider } from './comments/commentsDataProvider';
+import { CommentsTreeItem } from './comments/commentsTreeItem';
+import getCommentsData from './comments/commentsUpdate';
+
+import { TodosDataProvider } from './todos/todosDataProvider';
+import { TodosTreeItem } from './todos/todosTreeItem';
+import getTodosData from './todos/todosUpdate';
+
+let unusedLabelsDataProvider: UnusedLabelsDataProvider;
 let unusedLabelsTreeView: vscode.TreeView<UnusedLabelsTreeItem>;
+let currentFile: vscode.TextDocument | null;
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Vue Cleanup extension active');
-
-	initFileLabelsData();
-
-	unusedLabelsTreeView = vscode.window.createTreeView("unused-labels", {
-		"treeDataProvider": fileLabelsData,
-		"showCollapseAll": true
-	});
-	fileLabelsData.parentTreeView = unusedLabelsTreeView;
-
-	vscode.window.registerTreeDataProvider("unused-labels", fileLabelsData);
-	vscode.commands.registerCommand("unusedLabels.goToLabel", label => goToLabel(label));
-
+	init();
 	handleOnFileChange();
 	registerEvents();
 }
 
-function initFileLabelsData() {
-	fileLabelsData = new FileLabelsData();
+function init() {
+	console.log('Vue Cleanup extension active');
+	vscode.commands.registerCommand("vuecleanup.goToLabel", label => goToLabel(label));
+
+	unusedLabelsDataProvider = new UnusedLabelsDataProvider();
+	unusedLabelsTreeView = vscode.window.createTreeView("vuecleanup.unused-labels", {
+		"treeDataProvider": unusedLabelsDataProvider
+	});
+	vscode.window.registerTreeDataProvider("vuecleanup.unused-labels", unusedLabelsDataProvider);
+
+	// commentsDataProvider = new CommentsData
 }
 
 function registerEvents() {
@@ -35,24 +42,26 @@ function registerEvents() {
 }
 
 function handleOnFileChange(): void {
-	if (checkIfFileIsVue()) {
+	console.log("bes");
+	currentFile = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document : null;
+	if (currentFile && checkIfFileIsVue()) {
 		updateUnusedLabelsData();
 	}
 	else {
-		fileLabelsData.clearData();
-		fileLabelsData.refresh();
+		unusedLabelsDataProvider.clearData();
+		unusedLabelsDataProvider.refresh();
 	}
 }
 
 function updateUnusedLabelsData() {
-	if (vscode.window.activeTextEditor) {
-		fileLabelsData.updateData(checkForUnusedLabels(vscode.window.activeTextEditor.document));
-		fileLabelsData.refresh();
+	if (currentFile) {
+		unusedLabelsDataProvider.updateData(getUnusedLabelData(currentFile));
+		unusedLabelsDataProvider.refresh();
 	}
 }
 
 function checkIfFileIsVue(): Boolean {
-	return vscode.window.activeTextEditor?.document.languageId === 'vue';
+	return currentFile?.languageId === 'vue';
 }
 
 function goToLabel(label: string): void {
