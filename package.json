@@ -9,7 +9,10 @@
 		"vscode": "^1.67.0"
 	},
 	"categories": [
-		"Other"
+		"Linters"
+	],
+	"keywords": [
+		"FPS (First-Person Shooter)"
 	],
 	"activationEvents": [
 		"onView:vuecleanup.unused-labels"

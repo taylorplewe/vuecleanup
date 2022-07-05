@@ -14,6 +14,10 @@ import getTodosData from './todos/todosUpdate';
 
 let unusedLabelsDataProvider: UnusedLabelsDataProvider;
 let unusedLabelsTreeView: vscode.TreeView<UnusedLabelsTreeItem>;
+let commentsDataProvider: CommentsDataProvider;
+let commentsTreeView: vscode.TreeView<CommentsTreeItem>;
+let todosDataProvider: TodosDataProvider;
+let todosTreeView: vscode.TreeView<TodosTreeItem>;
 let currentFile: vscode.TextDocument | null;
 
 export function activate(context: vscode.ExtensionContext) {
@@ -32,6 +36,18 @@ function init() {
 	});
 	vscode.window.registerTreeDataProvider("vuecleanup.unused-labels", unusedLabelsDataProvider);
 
+	commentsDataProvider = new CommentsDataProvider();
+	commentsTreeView = vscode.window.createTreeView("vuecleanup.comments", {
+		"treeDataProvider": commentsDataProvider
+	});
+	vscode.window.registerTreeDataProvider("vuecleanup.comments", commentsDataProvider);
+
+	todosDataProvider = new TodosDataProvider();
+	todosTreeView = vscode.window.createTreeView("vuecleanup.todos", {
+		"treeDataProvider": todosDataProvider
+	});
+	vscode.window.registerTreeDataProvider("vuecleanup.todos", todosDataProvider);
+
 	// commentsDataProvider = new CommentsData
 }
 
@@ -42,10 +58,10 @@ function registerEvents() {
 }
 
 function handleOnFileChange(): void {
-	console.log("bes");
 	currentFile = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document : null;
 	if (currentFile && checkIfFileIsVue()) {
 		updateUnusedLabelsData();
+		updateTodosData();
 	}
 	else {
 		unusedLabelsDataProvider.clearData();
@@ -57,6 +73,13 @@ function updateUnusedLabelsData() {
 	if (currentFile) {
 		unusedLabelsDataProvider.updateData(getUnusedLabelData(currentFile));
 		unusedLabelsDataProvider.refresh();
+	}
+}
+
+function updateTodosData() {
+	if (currentFile) {
+		todosDataProvider.updateData(getTodosData(currentFile.getText()));
+		todosDataProvider.refresh();
 	}
 }
 
