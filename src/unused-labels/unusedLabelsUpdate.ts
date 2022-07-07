@@ -201,8 +201,6 @@ function getFileSectionByType(fileText: string, type: string, removeStrings: boo
 	);
 	const firstWhitespaceMatch = fileText.match(firstWhitespaceRegex);
 	const numLines = firstWhitespaceMatch ? firstWhitespaceMatch.input?.substring(0, firstWhitespaceMatch.index).match(/\n/gs)?.length : 0;
-	console.log(type + ":");
-	console.log("\t" + numLines);
 	const firstWhitespace = firstWhitespaceMatch ? firstWhitespaceMatch[0] : '';
 	const getSectionRegex: RegExp = new RegExp(
 		`(?:<\\s*?${type}.*?>)(.*)(?=^${firstWhitespace}<\\/\\s*${type})`, 'sm'

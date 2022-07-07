@@ -38,7 +38,13 @@
 			"vue-cleanup": [
 				{
 					"id": "vuecleanup.unused-labels",
-					"name": "Unused labels"
+					"name": "Unused labels",
+					"visibility": "visible"
+				},
+				{
+					"id": "vuecleanup.misc",
+					"name": "Misc",
+					"visibility": "visible"
 				},
 				{
 					"id": "vuecleanup.comments",

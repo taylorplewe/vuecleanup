@@ -1,4 +1,4 @@
-export default  {
+export default {
 	dataMembers: "data members",
 	computeds: "computed properties",
 	methods: "methods",

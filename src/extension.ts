@@ -1,23 +1,21 @@
 import * as vscode from 'vscode';
 
 import { UnusedLabelsDataProvider } from './unused-labels/unusedLabelsDataProvider';
-import { UnusedLabelsTreeItem } from './unused-labels/unusedLabelsTreeItem';
 import getUnusedLabelData from './unused-labels/unusedLabelsUpdate';
 
+import { MiscDataProvider } from './misc/miscDataProvider';
+import getMiscData from './misc/miscUpdate';
+
 import { CommentsDataProvider } from './comments/commentsDataProvider';
-import { CommentsTreeItem } from './comments/commentsTreeItem';
 import getCommentsData from './comments/commentsUpdate';
 
 import { TodosDataProvider } from './todos/todosDataProvider';
-import { TodosTreeItem } from './todos/todosTreeItem';
 import getTodosData from './todos/todosUpdate';
 
 let unusedLabelsDataProvider: UnusedLabelsDataProvider;
-let unusedLabelsTreeView: vscode.TreeView<UnusedLabelsTreeItem>;
+let miscDataProvider: MiscDataProvider;
 let commentsDataProvider: CommentsDataProvider;
-let commentsTreeView: vscode.TreeView<CommentsTreeItem>;
 let todosDataProvider: TodosDataProvider;
-let todosTreeView: vscode.TreeView<TodosTreeItem>;
 let currentFile: vscode.TextDocument | null;
 
 export function activate(context: vscode.ExtensionContext) {
@@ -31,19 +29,25 @@ function init() {
 	vscode.commands.registerCommand("vuecleanup.goToLabel", label => goToLabel(label));
 
 	unusedLabelsDataProvider = new UnusedLabelsDataProvider();
-	unusedLabelsTreeView = vscode.window.createTreeView("vuecleanup.unused-labels", {
+	vscode.window.createTreeView("vuecleanup.unused-labels", {
 		"treeDataProvider": unusedLabelsDataProvider
 	});
 	vscode.window.registerTreeDataProvider("vuecleanup.unused-labels", unusedLabelsDataProvider);
 
+	miscDataProvider = new MiscDataProvider();
+	vscode.window.createTreeView("vuecleanup.misc", {
+		"treeDataProvider": miscDataProvider
+	});
+	vscode.window.registerTreeDataProvider("vuecleanup.misc", miscDataProvider);
+
 	commentsDataProvider = new CommentsDataProvider();
-	commentsTreeView = vscode.window.createTreeView("vuecleanup.comments", {
+	vscode.window.createTreeView("vuecleanup.comments", {
 		"treeDataProvider": commentsDataProvider
 	});
 	vscode.window.registerTreeDataProvider("vuecleanup.comments", commentsDataProvider);
 
 	todosDataProvider = new TodosDataProvider();
-	todosTreeView = vscode.window.createTreeView("vuecleanup.todos", {
+	vscode.window.createTreeView("vuecleanup.todos", {
 		"treeDataProvider": todosDataProvider
 	});
 	vscode.window.registerTreeDataProvider("vuecleanup.todos", todosDataProvider);
@@ -61,6 +65,7 @@ function handleOnFileChange(): void {
 	currentFile = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document : null;
 	if (currentFile && checkIfFileIsVue()) {
 		updateUnusedLabelsData();
+		updateMiscData();
 		updateTodosData();
 		updateCommentsData();
 	}
@@ -74,6 +79,13 @@ function updateUnusedLabelsData(): void {
 	if (currentFile) {
 		unusedLabelsDataProvider.updateData(getUnusedLabelData(currentFile));
 		unusedLabelsDataProvider.refresh();
+	}
+}
+
+function updateMiscData(): void {
+	if (currentFile) {
+		miscDataProvider.updateData(getMiscData(currentFile.getText()));
+		miscDataProvider.refresh();
 	}
 }
 
