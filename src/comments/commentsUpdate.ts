@@ -1,13 +1,8 @@
-import * as vscode from 'vscode';
-
 export default function getCommentsData(fileText: string): string[] {
-    const searchCommentsRegex: RegExp = /\/\/[^\n]*?(\S.*)|\/\*[\s]*((?:[\s\S])*?)(?=\*\/)/gmi;
+    const searchCommentsRegex: RegExp = /\/\/[^\n]*?(\S.*)|\/\*[\s\*]*((?:[\s\S])*?)(?=\*\/)|<!--\s*(.*)(?=\s*-->)/gmi;
     const commentsMatch: RegExpMatchArray[] | null = [...fileText.matchAll(searchCommentsRegex)];
-    let comments: string[] = commentsMatch.map(t => t[1] ? t[1] : t[2]);
-
-    comments = filterOutTodosFromComments(comments);
-
-    return comments;
+    const comments: string[] = commentsMatch.map(t => t[1] ? t[1] : t[2] ? t[2] : t[3]);
+    return filterOutTodosFromComments(comments);;
 }
 
 function filterOutTodosFromComments(comments: string[]): string[] {
