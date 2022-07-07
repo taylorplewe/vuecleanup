@@ -13,7 +13,6 @@ export default function getMiscData(fileText: string): any[] {
 function searchNoBracketSpaces(text: string): any[] {
     const searchNoBracketSpacesRegex: RegExp = /^[^\n\w]*(.*?((?:\{+\w+|\w+\}).*))/gm;
     const searchNoBracketSpacesMatch: RegExpMatchArray[] = [...text.matchAll(searchNoBracketSpacesRegex)];
-    console.log(searchNoBracketSpacesMatch);
     const noBracketSpacesObjs: any[] = searchNoBracketSpacesMatch.map(m => { return {
         label: getTrimmedLabel(m[2]),
         line: m[1],

@@ -70,9 +70,19 @@ function handleOnFileChange(): void {
 		updateCommentsData();
 	}
 	else {
-		unusedLabelsDataProvider.clearData();
-		unusedLabelsDataProvider.refresh();
+		clearAll();
 	}
+}
+
+function clearAll(): void {
+	unusedLabelsDataProvider.clearData();
+	miscDataProvider.clearData();
+	commentsDataProvider.clearData();
+	todosDataProvider.clearData();
+	unusedLabelsDataProvider.refresh();
+	miscDataProvider.refresh();
+	commentsDataProvider.refresh();
+	todosDataProvider.refresh();
 }
 
 function updateUnusedLabelsData(): void {
