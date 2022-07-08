@@ -9,6 +9,7 @@ export default function getMiscData(docObj: any): any[] {
     suggestions.push(...searchTwoEquals(docObj.all));
     suggestions.push(...searchDoubleQuotes(docObj.scriptWithDoubleQuotes));
     suggestions.push(...searchEqualsTrue(docObj.template));
+    suggestions.push(...searchCamelCase(docObj.template));
 
     return suggestions;
 }
@@ -50,6 +51,17 @@ function searchEqualsTrue(text: string): any[] {
         label: getTrimmedLabel(m[1]),
         line: m[0],
         description: miscDescriptions.equalsTrue + m[2]
+    }});
+}
+
+function searchCamelCase(text: string): any[] {
+    console.log(text);
+    const searchCamelCaseRegex: RegExp = /.*?(\<\/?\w+[A-Z][^\n]*\>?|[:@]?\b\w+[A-Z]\w*?=).*?/g;
+    const searchCamelCaseMatch: RegExpMatchArray[] = [...text.matchAll(searchCamelCaseRegex)];
+    return searchCamelCaseMatch.map(m => { return {
+        label: getTrimmedLabel(m[1]),
+        line: m[0],
+        description: miscDescriptions.camelCase
     }});
 }
 
