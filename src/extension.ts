@@ -18,6 +18,8 @@ let commentsDataProvider: CommentsDataProvider;
 let todosDataProvider: TodosDataProvider;
 let currentFile: vscode.TextDocument | null;
 
+let docObj: any;
+
 export function activate(context: vscode.ExtensionContext) {
 	init();
 	handleOnFileChange();
@@ -64,6 +66,7 @@ function registerEvents() {
 function handleOnFileChange(): void {
 	currentFile = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document : null;
 	if (currentFile && checkIfFileIsVue()) {
+		updateSections();
 		updateUnusedLabelsData();
 		updateMiscData();
 		updateTodosData();
@@ -71,6 +74,19 @@ function handleOnFileChange(): void {
 	}
 	else {
 		clearAll();
+	}
+}
+
+function updateSections(): void {
+	if (currentFile) {
+		const allTextNoComments = removeCommentsFromText(currentFile.getText());
+		docObj = {
+			all: allTextNoComments,
+			template: getFileSectionByType(allTextNoComments, 'template', false),
+			script: getFileSectionByType(allTextNoComments, 'script', true),
+			scriptWithDoubleQuotes: getFileSectionByType(allTextNoComments, 'script', true, true),
+			style: getFileSectionByType(allTextNoComments, 'style', false)
+		}
 	}
 }
 
@@ -87,14 +103,14 @@ function clearAll(): void {
 
 function updateUnusedLabelsData(): void {
 	if (currentFile) {
-		unusedLabelsDataProvider.updateData(getUnusedLabelData(currentFile));
+		unusedLabelsDataProvider.updateData(getUnusedLabelData(docObj));
 		unusedLabelsDataProvider.refresh();
 	}
 }
 
 function updateMiscData(): void {
 	if (currentFile) {
-		miscDataProvider.updateData(getMiscData(currentFile.getText()));
+		miscDataProvider.updateData(getMiscData(docObj));
 		miscDataProvider.refresh();
 	}
 }
@@ -142,6 +158,63 @@ function goToLabel(label: string): void {
 			);
 		}
 	}
+}
+
+function removeCommentsFromText(text: string): string {
+	const searchCommentRegex: RegExp = /\/\/[^\n]*|\/\*.*?\*\//gs;
+	return text.replace(searchCommentRegex, '');
+}
+
+function getFileSectionByType(fileText: string, type: string, removeStrings: boolean, excludeDoubleQuotes: boolean = false): string {
+	const firstWhitespaceRegex: RegExp = new RegExp(
+		`^[^\\n\\w]*?(?=<\\s*?${type})`, 'm'
+	);
+	const firstWhitespaceMatch = fileText.match(firstWhitespaceRegex);
+	const numLines = firstWhitespaceMatch ? firstWhitespaceMatch.input?.substring(0, firstWhitespaceMatch.index).match(/\n/gs)?.length : 0;
+	const firstWhitespace = firstWhitespaceMatch ? firstWhitespaceMatch[0] : '';
+	const getSectionRegex: RegExp = new RegExp(
+		`(?:<\\s*?${type}.*?>)(.*)(?=^${firstWhitespace}<\\/\\s*${type})`, 'sm'
+	);
+	const sectionMatch = fileText.match(getSectionRegex);
+	if (removeStrings && sectionMatch)
+		return removeStringsFromText(sectionMatch[1], excludeDoubleQuotes)
+	else if (sectionMatch)
+		return sectionMatch[1];
+	else return '';
+}
+
+function removeStringsFromText(text: string, excludeDoubleQuotes: boolean = false): string {
+	const searchStringRegex: RegExp = excludeDoubleQuotes
+		? /'.*?'|`.*?`/gs
+		: /".*?"|'.*?'|`.*?`/gs;
+	let noStringsText = text;
+	noStringsText += formatEscapesForStringAppend(
+		extractFormattedStringEscapesInText(noStringsText)
+	);
+	noStringsText = noStringsText.replace(searchStringRegex, '');
+	return noStringsText;
+}
+
+function extractFormattedStringEscapesInText(text: string): string[] {
+	const searchFormattedStringsRegex: RegExp = /`.*?`/gs;
+	const searchEscapesRegex: RegExp = /(?<=\$\{).*?(?=\})/gs;
+
+	let escapes: string[] = [];
+	const formattedStringsMatch: string[] | null = text.match(searchFormattedStringsRegex);
+	formattedStringsMatch?.forEach(s => {
+		const escapesMatch: string[] | null = s.match(searchEscapesRegex);
+		if (escapesMatch) {
+			escapes.push(...(escapesMatch as string[]));
+		}
+	});
+	return escapes;
+}
+
+function formatEscapesForStringAppend(escapes: string[]): string {
+	let formattedEscapesString = '\n';
+	return escapes.reduce((prevString, currString) => {
+		return prevString + currString + '\n';
+	}, formattedEscapesString);
 }
 
 export function deactivate() {}

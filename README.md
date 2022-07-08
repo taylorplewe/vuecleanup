@@ -2,5 +2,4 @@
 
 ## Taylor Plewe, July 2022
 
-Checks your Vue code while you're working for any unused labels.
-More to come!
+Checks your Vue file for any unused variables, data members, computed properties, methods, and CSS classes.  Also checks for miscellaneous styling errors (incorrect whitespace etc.) and lists all comments and TODOs in the file.

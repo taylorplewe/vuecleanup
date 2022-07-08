@@ -2,23 +2,44 @@ import miscDescriptions from "./miscDescriptions";
 
 const MAX_LABEL_LENGTH = 18;
 
-export default function getMiscData(fileText: string): any[] {
+export default function getMiscData(docObj: any): any[] {
     let suggestions = [];
 
-    suggestions.push(...searchNoBracketSpaces(fileText));
+    suggestions.push(...searchNoBracketSpaces(docObj.all));
+    suggestions.push(...searchTwoEquals(docObj.all));
+    suggestions.push(...searchDoubleQuotes(docObj.scriptWithDoubleQuotes));
 
     return suggestions;
 }
 
 function searchNoBracketSpaces(text: string): any[] {
-    const searchNoBracketSpacesRegex: RegExp = /^[^\n\w]*(.*?((?:\{+\w+|\w+\}).*))/gm;
+    const searchNoBracketSpacesRegex: RegExp = /^.*?[^\^\$](\{+(?:\w+(?:[^\{\n]|\{.*\})*?\}+|(?:[^\{\n]|\{.*\})*[^\}\s]\}+)).*/gm;
     const searchNoBracketSpacesMatch: RegExpMatchArray[] = [...text.matchAll(searchNoBracketSpacesRegex)];
-    const noBracketSpacesObjs: any[] = searchNoBracketSpacesMatch.map(m => { return {
-        label: getTrimmedLabel(m[2]),
-        line: m[1],
+    return searchNoBracketSpacesMatch.map(m => { return {
+        label: getTrimmedLabel(m[1]),
+        line: m[0],
         description: miscDescriptions.noBracketSpaces
     }});
-    return noBracketSpacesObjs;
+}
+
+function searchTwoEquals(text: string): any[] {
+    const searchTwoEqualsRegex: RegExp = /^.*(\b\w.*?[^=!]==[^=].*?\w\b).*/gm;
+    const searchTwoEqualsMatch: RegExpMatchArray[] = [...text.matchAll(searchTwoEqualsRegex)];
+    return searchTwoEqualsMatch.map(m => { return {
+        label: getTrimmedLabel(m[1]),
+        line: m[0],
+        description: miscDescriptions.twoEquals
+    }});
+}
+
+function searchDoubleQuotes(text: string): any[] {
+    const searchDoubleQuotesRegex: RegExp = /^.*?("[^"]*?").*/gm;
+    const searchDoubleQuotesMatch: RegExpMatchArray[] = [...text.matchAll(searchDoubleQuotesRegex)];
+    return searchDoubleQuotesMatch.map(m => { return {
+        label: getTrimmedLabel(m[1]),
+        line: m[0],
+        description: miscDescriptions.doubleQuotes
+    }});
 }
 
 function getTrimmedLabel(label: string): string {

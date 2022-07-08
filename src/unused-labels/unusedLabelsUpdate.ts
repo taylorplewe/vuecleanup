@@ -1,39 +1,38 @@
-import * as vscode from 'vscode';
 import UNUSED_LABELS_TYPES from './unusedLabelsTypes';
 
 let templateSection: string;
+let scriptSection: string;
 let styleSection: string;
 
-export default function getUnusedLabelData(doc: vscode.TextDocument): any {
-	const fileText: string = removeCommentsFromText(doc.getText());
-	templateSection = getFileSectionByType(fileText, 'template', false);
-	styleSection = getFileSectionByType(fileText, 'style', false);
+export default function getUnusedLabelData(doc: any): any {
+	templateSection = doc.template;
+	scriptSection = doc.script;
+	styleSection = doc.style;
 
-	const varsInFile: Set<string> = getVarsInFile(fileText);
-	const cssClassesInFile: Set<string> = getCssClassesInFile(fileText);
-	const dataMembersInFile: Set<string> = getDataMembersInFile(fileText);
-	const computedsInFile: Set<string> = getKeysOfNestedObject(fileText, 'computed');
-	const methodsInFile: Set<string> = getKeysOfNestedObject(fileText, 'methods');
+	const varsInFile: Set<string> = getVarsInFile(doc.all);
+	const cssClassesInFile: Set<string> = getCssClassesInFile(doc.all);
+	const dataMembersInFile: Set<string> = getDataMembersInFile(doc.all);
+	const computedsInFile: Set<string> = getKeysOfNestedObject(doc.all, 'computed');
+	const methodsInFile: Set<string> = getKeysOfNestedObject(doc.all, 'methods');
 
 	let labelsWithOccurrences: any = buildLabelsWithOccurrences();
 
-	const scriptSectionNoCommentsOrStrings = getFileSectionByType(fileText, 'script', true);
 	varsInFile.forEach(v => {
 		// NOTE I should be able to search for variables in their own scope instead of doing this
 		labelsWithOccurrences.variables[v] =
-			getOccurrencesOfAnyPropertyInText(scriptSectionNoCommentsOrStrings, v);
+			getOccurrencesOfAnyPropertyInText(doc.script, v);
 	});
 	cssClassesInFile.forEach(c => {
-		labelsWithOccurrences.cssClasses[c] = getOccurrencesOfCssClasses(fileText, c.substring(1)) + 1;
+		labelsWithOccurrences.cssClasses[c] = getOccurrencesOfCssClasses(doc.all, c.substring(1)) + 1;
 	});
 	dataMembersInFile.forEach(d => {
-		labelsWithOccurrences.dataMembers[d] = getOccurrencesOfAnyPropertyInText(fileText, d);
+		labelsWithOccurrences.dataMembers[d] = getOccurrencesOfAnyPropertyInText(doc.all, d);
 	});
 	computedsInFile.forEach(c => {
-		labelsWithOccurrences.computeds[c] = getOccurrencesOfAnyPropertyInText(fileText, c);
+		labelsWithOccurrences.computeds[c] = getOccurrencesOfAnyPropertyInText(doc.all, c);
 	});
 	methodsInFile.forEach(m => {
-		labelsWithOccurrences.methods[m] = getOccurrencesOfAnyPropertyInText(fileText, m);
+		labelsWithOccurrences.methods[m] = getOccurrencesOfAnyPropertyInText(doc.all, m);
 	})
 
 	return labelsWithOccurrences;
@@ -159,56 +158,4 @@ function getNestedObjectInards(fileText: string, objectName: string): string {
 	);
 	const inardsMatch: RegExpMatchArray | null = fileText.match(getInardsRegex);
 	return inardsMatch ? inardsMatch[1] : '';
-}
-
-function removeCommentsFromText(text: string): string {
-	const searchCommentRegex: RegExp = /\/\/[^\n]*|\/\*.*?\*\//gs;
-	return text.replace(searchCommentRegex, '');
-}
-function removeStringsFromText(text: string): string {
-	const searchStringRegex: RegExp = /".*?"|'.*?'|`.*?`/gs;
-	let noStringsText = text;
-	noStringsText += formatEscapesForStringAppend(
-		extractFormattedStringEscapesInText(noStringsText)
-	);
-	noStringsText = noStringsText.replace(searchStringRegex, '');
-	return noStringsText;
-}
-function extractFormattedStringEscapesInText(text: string): string[] {
-	const searchFormattedStringsRegex: RegExp = /`.*?`/gs;
-	const searchEscapesRegex: RegExp = /(?<=\$\{).*?(?=\})/gs;
-
-	let escapes: string[] = [];
-	const formattedStringsMatch: string[] | null = text.match(searchFormattedStringsRegex);
-	formattedStringsMatch?.forEach(s => {
-		const escapesMatch: string[] | null = s.match(searchEscapesRegex);
-		if (escapesMatch) {
-			escapes.push(...(escapesMatch as string[]));
-		}
-	});
-	return escapes;
-}
-function formatEscapesForStringAppend(escapes: string[]): string {
-	let formattedEscapesString = '\n';
-	return escapes.reduce((prevString, currString) => {
-		return prevString + currString + '\n';
-	}, formattedEscapesString);
-}
-
-function getFileSectionByType(fileText: string, type: string, removeStrings: boolean): string {
-	const firstWhitespaceRegex: RegExp = new RegExp(
-		`^[^\\n\\w]*?(?=<\\s*?${type})`, 'm'
-	);
-	const firstWhitespaceMatch = fileText.match(firstWhitespaceRegex);
-	const numLines = firstWhitespaceMatch ? firstWhitespaceMatch.input?.substring(0, firstWhitespaceMatch.index).match(/\n/gs)?.length : 0;
-	const firstWhitespace = firstWhitespaceMatch ? firstWhitespaceMatch[0] : '';
-	const getSectionRegex: RegExp = new RegExp(
-		`(?:<\\s*?${type}.*?>)(.*)(?=^${firstWhitespace}<\\/\\s*${type})`, 'sm'
-	);
-	const sectionMatch = fileText.match(getSectionRegex);
-	if (removeStrings && sectionMatch)
-		return removeStringsFromText(sectionMatch[1])
-	else if (sectionMatch)
-		return sectionMatch[1];
-	else return '';
 }
