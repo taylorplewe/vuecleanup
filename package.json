@@ -15,7 +15,10 @@
 		"FPS (First-Person Shooter)"
 	],
 	"activationEvents": [
-		"onView:vuecleanup.unused-labels"
+		"onView:vuecleanup.unused-labels",
+		"onView:vuecleanup.misc",
+		"onView:vuecleanup.comments",
+		"onView:vuecleanup.todos"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -31,6 +34,18 @@
 		"viewsWelcome": [
 			{
 				"view": "vuecleanup.unused-labels",
+				"contents": "Open a Vue (.vue) file to use this extension."
+			},
+			{
+				"view": "vuecleanup.misc",
+				"contents": "Open a Vue (.vue) file to use this extension."
+			},
+			{
+				"view": "vuecleanup.comments",
+				"contents": "Open a Vue (.vue) file to use this extension."
+			},
+			{
+				"view": "vuecleanup.todos",
 				"contents": "Open a Vue (.vue) file to use this extension."
 			}
 		],

@@ -8,6 +8,7 @@ export default function getMiscData(docObj: any): any[] {
     suggestions.push(...searchNoBracketSpaces(docObj.all));
     suggestions.push(...searchTwoEquals(docObj.all));
     suggestions.push(...searchDoubleQuotes(docObj.scriptWithDoubleQuotes));
+    suggestions.push(...searchEqualsTrue(docObj.template));
 
     return suggestions;
 }
@@ -39,6 +40,16 @@ function searchDoubleQuotes(text: string): any[] {
         label: getTrimmedLabel(m[1]),
         line: m[0],
         description: miscDescriptions.doubleQuotes
+    }});
+}
+
+function searchEqualsTrue(text: string): any[] {
+    const searchEqualsTrueRegex: RegExp = /.*?(:(\w+)="true").*?/g;
+    const searchEqualsTrueMatch: RegExpMatchArray[] = [...text.matchAll(searchEqualsTrueRegex)];
+    return searchEqualsTrueMatch.map(m => { return {
+        label: getTrimmedLabel(m[1]),
+        line: m[0],
+        description: miscDescriptions.equalsTrue + m[2]
     }});
 }
 
