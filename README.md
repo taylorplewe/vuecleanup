@@ -27,7 +27,7 @@ Checks for miscellaneous syntactic things:
 
 I'm working on checking for more things like this. ↑
 
-Also lists all comments and TODOs in the file at a glance.
+Also lists all comments, TODOs and console.log's in the file at a glance.
 
 ### To-do
 - `x` button on each item in the extension's panel that saves that item to an ignore list

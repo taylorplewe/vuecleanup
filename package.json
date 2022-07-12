@@ -17,8 +17,7 @@
 	"activationEvents": [
 		"onView:vuecleanup.unused-labels",
 		"onView:vuecleanup.misc",
-		"onView:vuecleanup.comments",
-		"onView:vuecleanup.todos"
+		"onView:vuecleanup.leftovers"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -41,11 +40,7 @@
 				"contents": "Open a Vue (.vue) file to use this extension."
 			},
 			{
-				"view": "vuecleanup.comments",
-				"contents": "Open a Vue (.vue) file to use this extension."
-			},
-			{
-				"view": "vuecleanup.todos",
+				"view": "vuecleanup.leftovers",
 				"contents": "Open a Vue (.vue) file to use this extension."
 			}
 		],
@@ -62,13 +57,8 @@
 					"visibility": "visible"
 				},
 				{
-					"id": "vuecleanup.comments",
-					"name": "Comments",
-					"visibility": "collapsed"
-				},
-				{
-					"id": "vuecleanup.todos",
-					"name": "Todos",
+					"id": "vuecleanup.leftovers",
+					"name": "Leftovers",
 					"visibility": "collapsed"
 				}
 			]

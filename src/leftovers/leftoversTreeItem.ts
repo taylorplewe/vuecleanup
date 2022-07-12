@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 
-export class TodosTreeItem extends vscode.TreeItem {
+export class LeftoversTreeItem extends vscode.TreeItem {
 	constructor(
 		public readonly label: string,
 		public collapsibleState: vscode.TreeItemCollapsibleState,
-		public description?: string
+        public type: string,
+		public description?: string,
 	) {
 		super(label, collapsibleState);
         this.command = {
@@ -12,6 +13,7 @@ export class TodosTreeItem extends vscode.TreeItem {
             title: "Go to label",
             arguments: [this.label]
         }
+        this.type = type;
 		if (description) this.description = description;
 	}
 };

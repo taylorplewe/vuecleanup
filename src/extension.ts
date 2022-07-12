@@ -6,16 +6,12 @@ import getUnusedLabelData from './unused-labels/unusedLabelsUpdate';
 import { MiscDataProvider } from './misc/miscDataProvider';
 import getMiscData from './misc/miscUpdate';
 
-import { CommentsDataProvider } from './comments/commentsDataProvider';
-import getCommentsData from './comments/commentsUpdate';
-
-import { TodosDataProvider } from './todos/todosDataProvider';
-import getTodosData from './todos/todosUpdate';
+import { LeftoversDataProvider } from './leftovers/leftoversDataProvider';
+import getLeftoversData from './leftovers/leftoversUpdate';
 
 let unusedLabelsDataProvider: UnusedLabelsDataProvider;
 let miscDataProvider: MiscDataProvider;
-let commentsDataProvider: CommentsDataProvider;
-let todosDataProvider: TodosDataProvider;
+let leftoversDataProvider: LeftoversDataProvider;
 let currentFile: vscode.TextDocument | null;
 
 let docObj: any;
@@ -42,19 +38,11 @@ function init() {
 	});
 	vscode.window.registerTreeDataProvider("vuecleanup.misc", miscDataProvider);
 
-	commentsDataProvider = new CommentsDataProvider();
-	vscode.window.createTreeView("vuecleanup.comments", {
-		"treeDataProvider": commentsDataProvider
+	leftoversDataProvider = new LeftoversDataProvider();
+	vscode.window.createTreeView("vuecleanup.leftovers", {
+		"treeDataProvider": leftoversDataProvider
 	});
-	vscode.window.registerTreeDataProvider("vuecleanup.comments", commentsDataProvider);
-
-	todosDataProvider = new TodosDataProvider();
-	vscode.window.createTreeView("vuecleanup.todos", {
-		"treeDataProvider": todosDataProvider
-	});
-	vscode.window.registerTreeDataProvider("vuecleanup.todos", todosDataProvider);
-
-	// commentsDataProvider = new CommentsData
+	vscode.window.registerTreeDataProvider("vuecleanup.leftovers", leftoversDataProvider);
 }
 
 function registerEvents() {
@@ -69,8 +57,7 @@ function handleOnFileChange(): void {
 		updateSections();
 		updateUnusedLabelsData();
 		updateMiscData();
-		updateTodosData();
-		updateCommentsData();
+		udpateLeftoversData();
 	}
 	else {
 		clearAll();
@@ -93,12 +80,10 @@ function updateSections(): void {
 function clearAll(): void {
 	unusedLabelsDataProvider.clearData();
 	miscDataProvider.clearData();
-	commentsDataProvider.clearData();
-	todosDataProvider.clearData();
+	leftoversDataProvider.clearData();
 	unusedLabelsDataProvider.refresh();
 	miscDataProvider.refresh();
-	commentsDataProvider.refresh();
-	todosDataProvider.refresh();
+	leftoversDataProvider.refresh();
 }
 
 function updateUnusedLabelsData(): void {
@@ -115,17 +100,10 @@ function updateMiscData(): void {
 	}
 }
 
-function updateTodosData(): void {
+function udpateLeftoversData(): void {
 	if (currentFile) {
-		todosDataProvider.updateData(getTodosData(currentFile.getText()));
-		todosDataProvider.refresh();
-	}
-}
-
-function updateCommentsData(): void {
-	if (currentFile) {
-		commentsDataProvider.updateData(getCommentsData(currentFile.getText()));
-		commentsDataProvider.refresh();
+		leftoversDataProvider.updateData(getLeftoversData(currentFile.getText()));
+		leftoversDataProvider.refresh();
 	}
 }
 

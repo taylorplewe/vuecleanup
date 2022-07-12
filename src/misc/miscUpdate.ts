@@ -55,7 +55,6 @@ function searchEqualsTrue(text: string): any[] {
 }
 
 function searchCamelCase(text: string): any[] {
-    console.log(text);
     const searchCamelCaseRegex: RegExp = /.*?(\<\/?\w+[A-Z][^\n]*\>?|[:@]?\b\w+[A-Z]\w*?=).*?/g;
     const searchCamelCaseMatch: RegExpMatchArray[] = [...text.matchAll(searchCamelCaseRegex)];
     return searchCamelCaseMatch.map(m => { return {
