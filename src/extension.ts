@@ -69,6 +69,7 @@ function updateSections(): void {
 		const allTextNoComments = removeCommentsFromText(currentFile.getText());
 		docObj = {
 			all: allTextNoComments,
+			allWithComments: currentFile.getText(),
 			template: getFileSectionByType(allTextNoComments, 'template', false),
 			script: getFileSectionByType(allTextNoComments, 'script', true),
 			scriptWithDoubleQuotes: getFileSectionByType(allTextNoComments, 'script', true, true),

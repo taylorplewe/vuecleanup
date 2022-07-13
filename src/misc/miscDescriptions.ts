@@ -3,5 +3,6 @@ export default {
     twoEquals: 'three equals (===)',
     doubleQuotes: 'single quotes (\'\')',
     equalsTrue: 'can just be ',
-    camelCase: 'should be kebab-case'
+    camelCase: 'should be kebab-case',
+    trailingWhitespace: 'trailing whitespace'
 } as any;

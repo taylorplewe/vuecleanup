@@ -10,6 +10,7 @@ export default function getMiscData(docObj: any): any[] {
     suggestions.push(...searchDoubleQuotes(docObj.scriptWithDoubleQuotes));
     suggestions.push(...searchEqualsTrue(docObj.template));
     suggestions.push(...searchCamelCase(docObj.template));
+    suggestions.push(...searchTrailingWhitepace(docObj.allWithComments));
 
     return suggestions;
 }
@@ -61,6 +62,18 @@ function searchCamelCase(text: string): any[] {
         label: getTrimmedLabel(m[1]),
         line: m[0],
         description: miscDescriptions.camelCase
+    }});
+}
+
+function searchTrailingWhitepace(text: string): any[] {
+    const searchTrailingWhitepaceRegex: RegExp = /^\s*(\S+.*)[ \t]+$/gm;
+    const searchTrailingWhitepaceMatch: RegExpMatchArray[] = [...text.matchAll(searchTrailingWhitepaceRegex)];
+    console.log(text);
+    console.log(searchTrailingWhitepaceMatch);
+    return searchTrailingWhitepaceMatch.map(m => { return {
+        label: getTrimmedLabel(m[1]),
+        line: m[1],
+        description: miscDescriptions.trailingWhitespace
     }});
 }
 
